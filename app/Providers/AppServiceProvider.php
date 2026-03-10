@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Tambahkan logika ini
+        if (config('app.env') === 'production' || env('VERCEL')) {
+            URL::forceScheme('https');
+        }
     }
 }
