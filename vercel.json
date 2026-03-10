@@ -5,27 +5,12 @@
         "api/index.php": { "runtime": "vercel-php@0.7.2" }
     },
     "routes": [
-        {
-            "src": "/build/(.*)",
-            "dest": "/build/$1"
-        },
-        {
-            "src": "/assets/(.*)",
-            "dest": "/assets/$1"
-        },
-        {
-            "src": "/favicon.ico",
-            "dest": "/favicon.ico"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/api/index.php"
-        }
+        { "src": "/build/(.*)", "dest": "/public/build/$1" },
+        { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+        { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
+        { "src": "/(.*)", "dest": "/api/index.php" }
     ],
-    "public": true,
-    "installCommand": "composer install && npm install",
-    "buildCommand": "npm run build",
-    "outputDirectory": "public",
+    "public": true, 
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
