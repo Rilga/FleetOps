@@ -67,4 +67,20 @@ class AdminController extends Controller
 
         return view('admin.vessel_analysis', compact('ship', 'complianceRate', 'overdueTasks'));
     }
+
+    public function vesselAuditLog($ship_id)
+    {
+        // Cari kapal atau gagalkan jika tidak ada
+        $ship = Ship::findOrFail($ship_id);
+        
+        // Ambil riwayat dari semua mesin di kapal ini
+        $auditLogs = MaintenanceHistory::whereHas('task.machinery', function($query) use ($ship_id) {
+            $query->where('ship_id', $ship_id);
+        })
+        ->with(['task.machinery', 'verifier'])
+        ->latest()
+        ->paginate(20);
+
+        return view('admin.vessel_audit_log', compact('ship', 'auditLogs'));
+    }
 }

@@ -63,4 +63,6 @@ Route::middleware(['auth', 'adminMiddleware'])->group(function (){
     Route::get('/vessel/{ship_id}/analyze', [AdminController::class, 'analyzeVessel'])->name('admin.analyze');
     Route::get('/vessel/{ship_id}/export-pdf', [AdminController::class, 'exportPdf'])->name('export_pdf');
 
+    Route::get('/admin/vessel/{ship_id}/audit-log', [AdminController::class, 'vesselAuditLog'])->name('admin.vessel_audit_log');
+
 });

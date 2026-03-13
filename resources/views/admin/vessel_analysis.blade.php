@@ -104,7 +104,7 @@
                             </div>
                             @endforeach
                         </div>
-                        <a href="#" class="block text-center mt-6 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-blue-500 transition-colors">See Detailed Audit Log</a>
+                        <a href="{{ route('admin.vessel_audit_log', $ship->id) }}" class="block text-center mt-6 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-blue-500 transition-colors">See Detailed Audit Log</a>
                     </div>
 
                     <div class="bg-red-950/10 border border-red-900/30 p-6 rounded-3xl">
