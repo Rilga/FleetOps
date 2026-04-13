@@ -7,6 +7,7 @@ use App\Models\Ship;
 use App\Models\Machinery;
 use App\Models\MaintenanceTask;
 use App\Models\MaintenanceHistory;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -82,5 +83,26 @@ class AdminController extends Controller
         ->paginate(20);
 
         return view('admin.vessel_audit_log', compact('ship', 'auditLogs'));
+    }
+
+    public function exportShipPDF($id)
+    {
+        // Mengambil data kapal beserta mesin dan tugas perawatannya
+        $ship = Ship::with(['machineries.maintenanceTasks'])->findOrFail($id);
+        
+        $data = [
+            'ship' => $ship,
+            'date' => now()->format('d F Y H:i'),
+            'title' => 'Fleet Technical Report - ' . $ship->name
+        ];
+
+        // Load view khusus untuk PDF dan set ke Landscape
+        $pdf = Pdf::loadView('admin.reports.ship_pdf', $data)
+                  ->setPaper('a4', 'landscape');
+
+        // Download file dengan nama yang bersih
+        $fileName = 'Technical_Report_' . str_replace(' ', '_', $ship->name) . '_' . date('Ymd') . '.pdf';
+        
+        return $pdf->download($fileName);
     }
 }

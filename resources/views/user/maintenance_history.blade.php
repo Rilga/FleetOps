@@ -46,6 +46,11 @@
                                     <i class="fas fa-hourglass-half text-[10px]"></i>
                                     <span class="text-[9px] font-black uppercase">Pending</span>
                                 </div>
+
+                                <a href="{{ route('user.maintenance.edit', $log->id) }}" class="mt-2 flex items-center gap-2 px-4 py-1.5 bg-blue-600/10 border border-blue-500/20 text-blue-500 rounded-lg hover:bg-blue-600 hover:text-white transition-all group">
+                                    <i class="fas fa-edit text-[10px] group-hover:scale-110"></i>
+                                    <span class="text-[9px] font-black uppercase">Modify Log</span>
+                                </a>
                             @endif
                         </div>
                     </div>

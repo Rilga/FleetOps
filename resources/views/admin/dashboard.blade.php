@@ -73,7 +73,10 @@
                                         {{ $health }}
                                     </span>
                                 </td>
-                                <td class="p-6 text-right">
+                                <td class="p-6 text-right flex justify-end gap-4">
+                                    <a href="{{ route('admin.export-pdf', $ship->id) }}" class="inline-flex items-center gap-2 px-3 py-2 bg-red-600/10 border border-red-500/20 rounded-xl text-[9px] font-black text-red-500 uppercase hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                                        <i class="fas fa-file-pdf"></i> PDF
+                                    </a>
                                     <a href="{{ route('admin.analyze', $ship->id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black text-white uppercase hover:bg-blue-600 hover:border-blue-500 transition-all">
                                         Analyze Vessel <i class="fas fa-chevron-right text-[7px]"></i>
                                     </a>

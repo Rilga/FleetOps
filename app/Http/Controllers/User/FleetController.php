@@ -187,5 +187,35 @@ class FleetController extends Controller
         ->paginate(15);
 
         return view('user.maintenance_history', compact('machinery', 'histories'));
-    } 
+    }
+
+    public function editMaintenance($id)
+    {
+        $log = MaintenanceHistory::with('task')->findOrFail($id);
+
+        // Security check
+        if ($log->is_verified) {
+            return redirect()->back()->with('error', 'Cannot modify verified logs.');
+        }
+
+        return view('user.edit_maintenance', compact('log'));
+    }
+
+    public function updateMaintenance(Request $request, $id)
+    {
+        $log = MaintenanceHistory::findOrFail($id);
+
+        if ($log->is_verified) return abort(403);
+
+        $validated = $request->validate([
+            'done_at_rh' => 'required|numeric|min:0',
+            'completion_date' => 'required|date',
+            'remarks' => 'nullable|string|max:500'
+        ]);
+
+        $log->update($validated);
+
+        return redirect()->route('user.maintenance_history', $log->task->machinery_id)
+                        ->with('success', 'Maintenance log updated.');
+    }
 }

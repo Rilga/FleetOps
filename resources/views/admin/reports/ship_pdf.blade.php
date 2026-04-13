@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ $title }}</title>
+    <style>
+        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 12px; }
+        .header { text-align: center; border-bottom: 2px solid #0056b3; margin-bottom: 20px; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        .status-critical { color: #dc3545; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: right; font-size: 9px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ $title }}</h2>
+        <p>Vessel Identity: <strong>{{ $ship->name }}</strong> | Generated on: {{ $date }}</p>
+    </div>
+
+    @foreach($ship->machineries as $machinery)
+        <div style="background: #eee; padding: 5px; margin-top: 10px;">
+            <strong>UNIT: {{ strtoupper($machinery->name) }} ({{ $machinery->model }})</strong>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Job Details</th>
+                    <th>Interval</th>
+                    <th>Last Done</th>
+                    <th>Next Due</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($machinery->maintenanceTasks as $task)
+                <tr>
+                    <td>{{ $task->job_details }}</td>
+                    <td>{{ $task->interval }} hrs</td>
+                    <td>{{ number_format($task->last_done_rh, 0) }}</td>
+                    <td>{{ number_format($task->next_due_rh, 0) }}</td>
+                    <td class="status-{{ $task->status }}">{{ strtoupper($task->status) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endforeach
+
+    <div class="footer">
+        Gitera Fleet Management System - Confidential Report
+    </div>
+</body>
+</html>

@@ -42,6 +42,8 @@ Route::middleware(['auth', 'userMiddleware'])->group(function (){
     Route::get('/alerts', [FleetController::class, 'alerts'])->name('user.alerts');
 
     Route::get('/machinery/{machinery_id}/history', [FleetController::class, 'maintenanceHistory'])->name('user.maintenance_history');
+    Route::get('/maintenance/{id}/edit', [FleetController::class, 'editMaintenance'])->name('user.maintenance.edit');
+    Route::put('/maintenance/{id}/update', [FleetController::class, 'updateMaintenance'])->name('user.maintenance.update');
 });
 
 //Chief Route
@@ -64,5 +66,7 @@ Route::middleware(['auth', 'adminMiddleware'])->group(function (){
     Route::get('/vessel/{ship_id}/export-pdf', [AdminController::class, 'exportPdf'])->name('export_pdf');
 
     Route::get('/admin/vessel/{ship_id}/audit-log', [AdminController::class, 'vesselAuditLog'])->name('admin.vessel_audit_log');
+
+    Route::get('/admin/export-pdf/{id}', [AdminController::class, 'exportShipPDF'])->name('admin.export-pdf');
 
 });
