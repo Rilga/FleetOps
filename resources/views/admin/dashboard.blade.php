@@ -157,10 +157,32 @@
                 }
 
                 const url = new URL(link.dataset.exportUrl, window.location.origin);
-                if (month) url.searchParams.set('month', month);
-                if (startDate) url.searchParams.set('start_date', startDate);
-                if (endDate) url.searchParams.set('end_date', endDate);
+                if (startDate && endDate) {
+                    url.searchParams.set('start_date', startDate);
+                    url.searchParams.set('end_date', endDate);
+                } else if (month) {
+                    url.searchParams.set('month', month);
+                }
                 link.href = url.toString();
+            });
+        });
+
+        const pdfMonth = document.getElementById('pdf-month');
+        const pdfStartDate = document.getElementById('pdf-start-date');
+        const pdfEndDate = document.getElementById('pdf-end-date');
+
+        pdfMonth.addEventListener('change', () => {
+            if (pdfMonth.value) {
+                pdfStartDate.value = '';
+                pdfEndDate.value = '';
+            }
+        });
+
+        [pdfStartDate, pdfEndDate].forEach((input) => {
+            input.addEventListener('change', () => {
+                if (pdfStartDate.value || pdfEndDate.value) {
+                    pdfMonth.value = '';
+                }
             });
         });
 

@@ -89,37 +89,40 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'month' => ['nullable', 'date_format:Y-m'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_date' => ['nullable', 'date', 'required_with:end_date'],
+            'end_date' => ['nullable', 'date', 'required_with:start_date', 'after_or_equal:start_date'],
         ]);
 
-        if (filled($validated['start_date'] ?? null) xor filled($validated['end_date'] ?? null)) {
-            return back()->withErrors('Tanggal mulai dan tanggal selesai harus diisi bersamaan.');
+        $hasDateRange = filled($validated['start_date'] ?? null);
+
+        // Memuat riwayat untuk kapal ini sekali, lalu melakukan filter pada koleksi.
+        // Pendekatan ini menghindari subquery relasi yang gagal pada database production.
+        $ship = Ship::with('machineries.maintenanceTasks.histories')->findOrFail($id);
+
+        foreach ($ship->machineries as $machinery) {
+            $tasks = $machinery->maintenanceTasks->map(function ($task) use ($validated, $hasDateRange) {
+                $histories = $task->histories->filter(function ($history) use ($validated, $hasDateRange) {
+                    $completionDate = \Carbon\Carbon::parse($history->completion_date)->toDateString();
+
+                    if ($hasDateRange) {
+                        return $completionDate >= $validated['start_date']
+                            && $completionDate <= $validated['end_date'];
+                    }
+
+                    if (filled($validated['month'] ?? null)) {
+                        return str_starts_with($completionDate, $validated['month']);
+                    }
+
+                    return true;
+                })->values();
+
+                $task->setRelation('histories', $histories);
+
+                return $task;
+            })->filter(fn ($task) => $task->histories->isNotEmpty())->values();
+
+            $machinery->setRelation('maintenanceTasks', $tasks);
         }
-
-        $historyFilter = function ($query) use ($validated) {
-            if (filled($validated['start_date'] ?? null)) {
-                $query->whereBetween('completion_date', [
-                    $validated['start_date'],
-                    $validated['end_date'],
-                ]);
-
-                return;
-            }
-
-            if (filled($validated['month'] ?? null)) {
-                $query->whereYear('completion_date', substr($validated['month'], 0, 4))
-                    ->whereMonth('completion_date', substr($validated['month'], 5, 2));
-            }
-        };
-
-        // Hanya ambil task yang memiliki riwayat maintenance pada periode yang dipilih.
-        $ship = Ship::with([
-            'machineries.maintenanceTasks' => function ($query) use ($historyFilter) {
-                $query->whereHas('histories', $historyFilter)
-                    ->with(['histories' => $historyFilter]);
-            },
-        ])->findOrFail($id);
 
         $period = 'All maintenance history';
         if (filled($validated['start_date'] ?? null)) {
