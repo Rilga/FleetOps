@@ -97,12 +97,20 @@ class AdminController extends Controller
 
         // Memuat riwayat untuk kapal ini sekali, lalu melakukan filter pada koleksi.
         // Pendekatan ini menghindari subquery relasi yang gagal pada database production.
-        $ship = Ship::with('machineries.maintenanceTasks.histories')->findOrFail($id);
+        $ship = Ship::with([
+            'machineries.maintenanceTasks.histories' => fn ($query) => $query->reorder(),
+        ])->findOrFail($id);
 
         foreach ($ship->machineries as $machinery) {
             $tasks = $machinery->maintenanceTasks->map(function ($task) use ($validated, $hasDateRange) {
                 $histories = $task->histories->filter(function ($history) use ($validated, $hasDateRange) {
-                    $completionDate = \Carbon\Carbon::parse($history->completion_date)->toDateString();
+                    // Gunakan nilai mentah agar data riwayat lama yang tidak valid
+                    // tidak menyebabkan exception saat laporan dibuat di production.
+                    $completionDate = substr((string) $history->getRawOriginal('completion_date'), 0, 10);
+
+                    if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $completionDate)) {
+                        return false;
+                    }
 
                     if ($hasDateRange) {
                         return $completionDate >= $validated['start_date']
@@ -128,7 +136,7 @@ class AdminController extends Controller
         if (filled($validated['start_date'] ?? null)) {
             $period = 'Completion date: ' . $validated['start_date'] . ' to ' . $validated['end_date'];
         } elseif (filled($validated['month'] ?? null)) {
-            $period = 'Completion month: ' . \Carbon\Carbon::createFromFormat('Y-m', $validated['month'])->format('F Y');
+            $period = 'Completion month: ' . $validated['month'];
         }
         
         $data = [

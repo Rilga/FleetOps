@@ -41,7 +41,7 @@
                 <tr>
                     <td>{{ $task->job_details }}</td>
                     <td>{{ $task->interval }} hrs</td>
-                    <td>{{ \Carbon\Carbon::parse($history->completion_date)->format('d M Y') }}</td>
+                    <td>{{ $history->completion_date }}</td>
                     <td>{{ number_format($history->done_at_rh, 0) }}</td>
                     <td>{{ $history->is_verified ? 'VERIFIED' : 'PENDING' }}</td>
                 </tr>
