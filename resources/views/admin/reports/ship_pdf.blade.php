@@ -51,7 +51,6 @@
                     <td colspan="5" style="text-align: center; color: #777;">No maintenance history for the selected period.</td>
                 </tr>
                 @endforelse
-                @endforeach
             </tbody>
         </table>
     @endforeach
