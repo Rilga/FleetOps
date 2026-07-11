@@ -18,6 +18,7 @@
     <div class="header">
         <h2>{{ $title }}</h2>
         <p>Vessel Identity: <strong>{{ $ship->name }}</strong> | Generated on: {{ $date }}</p>
+        <p>Period: <strong>{{ $period }}</strong></p>
     </div>
 
     @foreach($ship->machineries as $machinery)
@@ -29,20 +30,27 @@
                 <tr>
                     <th>Job Details</th>
                     <th>Interval</th>
-                    <th>Last Done</th>
-                    <th>Next Due</th>
-                    <th>Status</th>
+                    <th>Completion Date</th>
+                    <th>Done at RH</th>
+                    <th>Verification</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($machinery->maintenanceTasks as $task)
+                @forelse($machinery->maintenanceTasks as $task)
+                    @foreach($task->histories as $history)
                 <tr>
                     <td>{{ $task->job_details }}</td>
                     <td>{{ $task->interval }} hrs</td>
-                    <td>{{ number_format($task->last_done_rh, 0) }}</td>
-                    <td>{{ number_format($task->next_due_rh, 0) }}</td>
-                    <td class="status-{{ $task->status }}">{{ strtoupper($task->status) }}</td>
+                    <td>{{ \Carbon\Carbon::parse($history->completion_date)->format('d M Y') }}</td>
+                    <td>{{ number_format($history->done_at_rh, 0) }}</td>
+                    <td>{{ $history->is_verified ? 'VERIFIED' : 'PENDING' }}</td>
                 </tr>
+                    @endforeach
+                @empty
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #777;">No maintenance history for the selected period.</td>
+                </tr>
+                @endforelse
                 @endforeach
             </tbody>
         </table>

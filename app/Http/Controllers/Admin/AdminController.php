@@ -85,15 +85,54 @@ class AdminController extends Controller
         return view('admin.vessel_audit_log', compact('ship', 'auditLogs'));
     }
 
-    public function exportShipPDF($id)
+    public function exportShipPDF(Request $request, $id)
     {
-        // Mengambil data kapal beserta mesin dan tugas perawatannya
-        $ship = Ship::with(['machineries.maintenanceTasks'])->findOrFail($id);
+        $validated = $request->validate([
+            'month' => ['nullable', 'date_format:Y-m'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        if (filled($validated['start_date'] ?? null) xor filled($validated['end_date'] ?? null)) {
+            return back()->withErrors('Tanggal mulai dan tanggal selesai harus diisi bersamaan.');
+        }
+
+        $historyFilter = function ($query) use ($validated) {
+            if (filled($validated['start_date'] ?? null)) {
+                $query->whereBetween('completion_date', [
+                    $validated['start_date'],
+                    $validated['end_date'],
+                ]);
+
+                return;
+            }
+
+            if (filled($validated['month'] ?? null)) {
+                $query->whereYear('completion_date', substr($validated['month'], 0, 4))
+                    ->whereMonth('completion_date', substr($validated['month'], 5, 2));
+            }
+        };
+
+        // Hanya ambil task yang memiliki riwayat maintenance pada periode yang dipilih.
+        $ship = Ship::with([
+            'machineries.maintenanceTasks' => function ($query) use ($historyFilter) {
+                $query->whereHas('histories', $historyFilter)
+                    ->with(['histories' => $historyFilter]);
+            },
+        ])->findOrFail($id);
+
+        $period = 'All maintenance history';
+        if (filled($validated['start_date'] ?? null)) {
+            $period = 'Completion date: ' . $validated['start_date'] . ' to ' . $validated['end_date'];
+        } elseif (filled($validated['month'] ?? null)) {
+            $period = 'Completion month: ' . \Carbon\Carbon::createFromFormat('Y-m', $validated['month'])->format('F Y');
+        }
         
         $data = [
             'ship' => $ship,
             'date' => now()->format('d F Y H:i'),
-            'title' => 'Fleet Technical Report - ' . $ship->name
+            'title' => 'Fleet Technical Report - ' . $ship->name,
+            'period' => $period,
         ];
 
         // Load view khusus untuk PDF dan set ke Landscape

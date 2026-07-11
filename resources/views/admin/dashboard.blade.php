@@ -32,6 +32,25 @@
                         <p class="text-[9px] text-slate-500 uppercase mt-2 tracking-widest font-bold">Real-time Machinery Compliance across 8 Vessels</p>
                     </div>
                 </div>
+
+                <div class="px-6 py-4 border-b border-slate-800 bg-black/10">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">PDF report period: select a month or a date range</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label for="pdf-month" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Month</label>
+                            <input id="pdf-month" type="month" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                        <div>
+                            <label for="pdf-start-date" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Start date</label>
+                            <input id="pdf-start-date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                        <div>
+                            <label for="pdf-end-date" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">End date</label>
+                            <input id="pdf-end-date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                    </div>
+                    <p class="text-[9px] text-slate-600 mt-2">Date range takes priority when it is filled. Leave all fields blank to export all maintenance history.</p>
+                </div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -74,7 +93,7 @@
                                     </span>
                                 </td>
                                 <td class="p-6 text-right flex justify-end gap-4">
-                                    <a href="{{ route('admin.export-pdf', $ship->id) }}" class="inline-flex items-center gap-2 px-3 py-2 bg-red-600/10 border border-red-500/20 rounded-xl text-[9px] font-black text-red-500 uppercase hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                                    <a href="{{ route('admin.export-pdf', $ship->id) }}" data-export-url="{{ route('admin.export-pdf', $ship->id) }}" class="pdf-export-link inline-flex items-center gap-2 px-3 py-2 bg-red-600/10 border border-red-500/20 rounded-xl text-[9px] font-black text-red-500 uppercase hover:bg-red-600 hover:text-white transition-all shadow-sm">
                                         <i class="fas fa-file-pdf"></i> PDF
                                     </a>
                                     <a href="{{ route('admin.analyze', $ship->id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black text-white uppercase hover:bg-blue-600 hover:border-blue-500 transition-all">
@@ -125,6 +144,26 @@
         </div>
     </div>
     <script>
+        document.querySelectorAll('.pdf-export-link').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                const month = document.getElementById('pdf-month').value;
+                const startDate = document.getElementById('pdf-start-date').value;
+                const endDate = document.getElementById('pdf-end-date').value;
+
+                if ((startDate && !endDate) || (!startDate && endDate)) {
+                    event.preventDefault();
+                    alert('Start date and end date must be filled together.');
+                    return;
+                }
+
+                const url = new URL(link.dataset.exportUrl, window.location.origin);
+                if (month) url.searchParams.set('month', month);
+                if (startDate) url.searchParams.set('start_date', startDate);
+                if (endDate) url.searchParams.set('end_date', endDate);
+                link.href = url.toString();
+            });
+        });
+
         const ctx = document.getElementById('complianceChart').getContext('2d');
         
         // Mengambil data dari PHP ke JavaScript
