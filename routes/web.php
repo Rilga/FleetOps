@@ -55,6 +55,7 @@ Route::middleware(['auth', 'chiefMiddleware'])->group(function (){
     Route::get('/chief/approvals', [ChiefController::class, 'approvalList'])->name('chief.approvals');
     Route::get('/chief/inspect/{ship_id}', [ChiefController::class, 'inspectVessel'])->name('chief.inspect');
     Route::get('/chief/machinery/{machinery_id}/history', [ChiefController::class, 'machineryHistory'])->name('chief.machinery_history');
+    Route::get('/chief/export-pdf/{id}', [AdminController::class, 'exportShipPDF'])->name('chief.export-pdf');
 });
 
 //Admin Route

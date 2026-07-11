@@ -94,6 +94,56 @@
                     <i class="fas fa-print"></i> Print Report
                 </button>
             </div>
+
+            <form action="{{ route('chief.export-pdf', $ship->id) }}" method="GET" class="mt-6 bg-[#1a1c23]/80 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+                    <div class="flex-1">
+                        <h3 class="text-xs font-black text-white uppercase tracking-widest">Export PDF Report</h3>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-2">Select one month or a completion-date range.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-[2]">
+                        <div>
+                            <label for="pdf-month" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Month</label>
+                            <input id="pdf-month" name="month" type="month" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                        <div>
+                            <label for="pdf-start-date" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Start date</label>
+                            <input id="pdf-start-date" name="start_date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                        <div>
+                            <label for="pdf-end-date" class="block text-[9px] font-bold text-slate-500 uppercase mb-1">End date</label>
+                            <input id="pdf-end-date" name="end_date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-blue-500 focus:ring-0">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                </div>
+                <p class="text-[9px] text-slate-600 mt-4">A date range takes priority. Leave every field blank to export all maintenance history.</p>
+            </form>
         </div>
     </div>
+
+    <script>
+        const pdfMonth = document.getElementById('pdf-month');
+        const pdfStartDate = document.getElementById('pdf-start-date');
+        const pdfEndDate = document.getElementById('pdf-end-date');
+
+        pdfMonth.addEventListener('change', () => {
+            if (pdfMonth.value) {
+                pdfStartDate.value = '';
+                pdfEndDate.value = '';
+            }
+        });
+
+        [pdfStartDate, pdfEndDate].forEach((input) => {
+            input.addEventListener('change', () => {
+                if (pdfStartDate.value || pdfEndDate.value) {
+                    pdfMonth.value = '';
+                }
+            });
+        });
+    </script>
 </x-app-layout>
